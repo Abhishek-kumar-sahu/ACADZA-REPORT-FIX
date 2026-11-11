@@ -5,22 +5,23 @@ Read this first in every session. Update it whenever a major decision or status 
 ## Identity
 **Acadza: Report → Fix.** An AI-assisted triage and faculty review console for student-reported question errors. This is the Acadza AI Intern Assignment. The brief is in `docs/ASSIGNMENT_BRIEF.md`.
 
-## Status (2026-11-11, end of Phase 7)
-- ✅ Phases 0–7: inspection, docs, data layer, API foundation, rules-only triage engine, faculty review & safe execution, faculty console frontend, **full system integration, QA & security audit**.
-- ✅ `pytest`: **509 passed, 0 skipped**: 453 backend + 56 browser e2e (`test_console_e2e.py`, Playwright driving installed Microsoft Edge).
-- ✅ `results.json` (44) and `bonus_findings.json` (7) verified deterministic and compliant.
-- ✅ Full E2E lifecycle and data integrity invariants verified.
-- ⛔ **T2.5 PostgreSQL tests not executed** (no Docker daemon). Hard gate before production deploy.
-- ❌ Not done: production deployment (Phase 9), screen recording, LLM provider (T4.3/T4.4).
+## Status (2026-11-12)
+- ✅ **Phases 0–7 Complete:** inspection, documentation, data layer & triggers, API foundation & auth, rules-only triage engine, faculty review & safe execution, faculty console frontend, full system integration, QA & security audit.
+- ✅ **Verified Test Suite:** **509 passed, 0 skipped**: 453 backend unit/integration/security tests + 56 browser E2E tests (`test_console_e2e.py`, Playwright driving installed Microsoft Edge).
+- ✅ **Deliverables Contract:** `results.json` (44) and `bonus_findings.json` (7) verified deterministic and compliant.
+- ✅ **Database:** SQLite is the default and existing database (`acadza.db`). No migration to PostgreSQL or MySQL.
+- ✅ **AI Integration:** Google Gemini (`gemini-1.5-flash`) integrated via environment settings with deterministic rules-engine fallback.
+- ⏸️ **Phase 8: NOT started** (planned formal testing & QA sign-off).
+- ⏸️ **Phase 9–10: Planned** (Render live deployment and 3-min screen recording).
 
 ## Project decisions (user)
 1. Metadata/syllabus problems are defects only via taxonomy `wrong_chapter` / `syllabus` (faculty).
 2. `results.json` edits are a single `{field, find, replace}` or null. mcq is a list internally. Multi-field fixes get faculty_review + edit null.
-3. SQLite local, persistent PostgreSQL in production. Postgres tests must pass before deploy.
+3. SQLite is the primary, default, and existing database (`acadza.db`); no MySQL or PostgreSQL migration.
 4. `FACULTY_ACCESS_KEY` on every write (fail closed). Reads public.
-5. Rules-only engine first, labelled. A provider-independent adapter comes later.
+5. Gemini API integration configured (`gemini-1.5-flash`), with transparent fallback to deterministic rules engine (`rules-v1`).
 6. `bonus_findings.json` is separate (verified vs suspected). `results.json` has exactly 44 entries.
-7. (Phase 4 brief) Never automatically approve, reject or publish repairs in Phase 4; route uncertain cases to faculty; never hard-code trap IDs.
+7. Never automatically execute repairs without explicit human faculty approval; route uncertain cases to faculty; never hard-code trap IDs.
 
 ## Triage results (rules-v1)
 - **Verdicts:** defect 27, no_error 11, display_issue 2, already_fixed 1, app_issue 1, language_mode 1, not_actionable 1.

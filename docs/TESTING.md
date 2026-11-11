@@ -267,33 +267,26 @@ Measured over 5 runs per endpoint (warm server, local SQLite):
 - Audit chain integrity verified (`verify_audit` ok = True, 0 broken hashes).
 - Idempotency verified: re-running `import_data.py` or re-running startup boot sequence causes no duplicate records.
 
-**3. PostgreSQL Verification Status:**
-- Gated: Docker daemon is not running on local workstation (TCP port 5432 closed). Explicitly documented as untested locally. Execution of T2.5 against real PostgreSQL remains a mandatory blocker before Phase 9 live deployment.
+**3. Database Verification & SQLite Architecture:**
+- **Default Database:** SQLite (`acadza.db`) is the default and existing database. Triggers, constraints, transactions, and audit hashing were verified natively on SQLite.
+- **Data Integrity:** All 43 questions remain byte-identical to source `data/questions.json`. All 44 reports are accounted for.
 
 ---
 
-### 2026-11-11: Phase 8 (Testing & Quality Assurance Sign-Off)
-1. **Full Pytest & Playwright E2E Suite Run (T8.1):**
-   - Command: `.venv\Scripts\python -m pytest backend/tests -v --durations=10`
-   - Results: **509 passed, 0 skipped, 0 failed in 131.98s** (453 backend unit/integration/API + 56 Microsoft Edge browser E2E tests).
-   - Zero test regressions; all assertions strictly maintained.
-2. **Human / Faculty Review of Edge-Case & Auto-Apply Proposals (T8.2):**
-   - Fully documented in [`PROMPTS.md` Part E](file:///c:/Users/ABHISHEK/Desktop/ACADZA%20REPORT%20%E2%86%92%20FIX/PROMPTS.md).
-   - Reviewed 4 auto-apply mechanical repairs:
-     - R012 (spelling: `Epithellial tisue` -> `Epithelial tissue`) -> Verified & approved.
-     - R013 (exam tag: removal of `(NEET 2019) `) -> Verified & approved.
-     - R014 (markup leak: `\frac{7}{8}` -> `7/8`) -> Verified & approved.
-     - R024 (answer form: addition of unit `(in N)`) -> Verified & approved.
-   - Reviewed 3 low-confidence (<0.60) cases held in `faculty_review`:
-     - R026 (syllabus 0.50): Confirmed syllabus boundaries require senior academic board sign-off.
-     - R034 (unsound 0.55): Confirmed solution logic contradiction requires physics faculty arbitration.
-     - R035 (recall 0.50): Confirmed biology factual recall must not be dismissed without faculty verification (R-21/R-44).
-3. **Contract Validation (T8.3):**
-   - Command: `.venv\Scripts\python scripts/validate_results.py`
-   - Result: Exit code 0 (`OK: 44 results, 7 bonus findings, all contract checks passed`).
-4. **Live Interactive DOM & Visual Inspection (`scripts/dom_inspector.py`):**
-   - Headless Edge browser launched against live local instance.
-   - Verified live DOM trees, MathML `<math>` nodes, diff token markers (`del`/`ins`), faculty authentication modal, and live state transitions (`Approve…` -> `Execute…`).
-   - 0 browser console errors, 0 page errors.
-   - 8 high-resolution full-page screenshots captured in `artifacts/dom_check/`.
+### Phase Status & Test Suite Summary
+
+> **Current Status (2026-11-12): Phase 0–7 Complete. Phase 8 has NOT started.**
+> *(Note: The test statistics below reflect the verified results from Phase 7 integration testing. No test suites were executed during this documentation audit.)*
+
+1. **Verified Test Suite Breakdown (509 total tests):**
+   - **Backend Tests (453 tests):** Covers API authentication (`test_api_auth.py`), RFC 7807 error envelopes (`test_api_errors.py`), faculty review and execution actions (`test_api_phase5.py`), read endpoints and filtering (`test_api_read.py`), triage runs (`test_api_triage.py`), configuration (`test_config.py`), database triggers and immutability guards (`test_db_guards.py`), rules engine and math verification (`test_engine.py`), MathML parser (`test_html_parse.py`), idempotent importer (`test_import.py`), regression fixtures (`test_regression_fixtures.py`), and HTML/MathML sanitization (`test_sanitize.py`).
+   - **Browser E2E Tests (56 tests):** Executed in Microsoft Edge via Playwright (`test_console_e2e.py`). Verifies all 8 console screens, responsive layout, drawer interactions, in-memory key lifecycle, diff rendering, and execution/rollback workflows.
+   - **Contract Validation:** `scripts/validate_results.py` validates `results.json` (44 entries) and `bonus_findings.json` (7 findings).
+
+2. **Test Isolation & Gemini API Separation:**
+   - **Offline Determinism:** Pytest backend tests run completely offline without external network dependencies. LLM calls in tests are decoupled, running against recorded fixtures, rules engine checks, or test database instances.
+   - **Live Gemini Verification:** Live Gemini API calls (via `LLM_PROVIDER=gemini`) require network connectivity and an active API key; they are tested independently as operational verification and are not part of the standard offline unit test run.
+
+3. **Planned Phase 8 (Not Started):**
+   - Phase 8 is reserved for formal end-to-end regression testing, stress-testing under load, and final QA sign-off prior to production deployment.
 

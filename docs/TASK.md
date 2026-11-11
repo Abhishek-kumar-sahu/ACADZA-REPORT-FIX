@@ -92,14 +92,14 @@ Legend: priority **P0** = blocks submission, **P1** = judged heavily, **P2** = p
 | [x] | T7.3 | Performance benchmarks: latency measurements across all routes (<55ms API, <10ms static) | P1 | T7.1 | benchmarks recorded in TESTING.md | done |
 | [x] | T7.4 | Data integrity verification: 43 original questions, 44 reports, results.json, bonus_findings | P0 | T7.1 | all invariants confirmed | done |
 
-## Phase 8: Testing and QA (done 2026-11-11)
-| [x] | T8.1 | Full pytest + Playwright run. Fix failures. | P0 | T7.1 | all green (509 passed), logged in TESTING §8 | done |
-| [x] | T8.2 | Human review of every low-confidence and every auto_apply result | P0 | T4.6 | reviewed list in PROMPTS.md Part E | done |
-| [x] | T8.3 | `validate_results.py` green | P0 | T4.6 | exit 0 (44 results, 7 bonus findings verified) | done |
+## Phase 8: Testing and QA (planned — NOT started)
+| [ ] | T8.1 | Full pytest + Playwright regression run | P0 | T7.1 | planned | todo |
+| [ ] | T8.2 | Final human review sign-off of low-confidence and auto-apply cases | P0 | T4.6 | planned | todo |
+| [ ] | T8.3 | Final deliverables contract validation | P0 | T4.6 | planned | todo |
 
 ## Phase 9: Deployment
-| [x] | T9.1 | `render.yaml`, requirements pinned, `.gitattributes` | P0 | T8.1 | verified & tested | done |
-| [ ] | T9.2 | Deploy and run DEPLOYMENT §6 checks | P0 | T9.1, **T2.5** | live URL passes all 5 checks | todo |
+| [x] | T9.1 | `render.yaml`, requirements pinned, `.gitattributes` | P0 | T7.1 | verified & tested | done |
+| [ ] | T9.2 | Deploy and run DEPLOYMENT §6 checks on Render | P0 | T9.1 | planned | todo |
 
 ## Phase 10: Submission
 | [ ] | T10.1 | Finalise PROMPTS.md (real runs, version history, failures) | P0 | T8.2 | no draft markers left | todo |
@@ -111,16 +111,17 @@ Legend: priority **P0** = blocks submission, **P1** = judged heavily, **P2** = p
 
 ## Open questions
 
-Resolved 2026-11-10 by the user's project decisions:
+Resolved by project decisions:
 
 | ID | Resolution |
 |---|---|
 | Q-1 | Metadata/syllabus problems are `defect` only via the taxonomy's `wrong_chapter` / `syllabus`; always faculty_review (R-23). |
 | Q-2 | `results.json` edits are single `{field, find, replace}` or null. mcq answers are normalised to lists internally. Multi-field fixes go to faculty_review with edit null (R-14, ADR-008). |
-| Q-3 | SQLite local, persistent PostgreSQL in production (ADR-015). |
+| Q-3 | SQLite is the primary, default, and existing database (`acadza.db`); no MySQL or PostgreSQL migration. |
 | Q-4 | Server-side faculty key on all writes; reads public (R-85, ADR-016). |
-| Q-5 | Rules-only first, clearly labelled; provider-independent adapter for Gemini and others later (ADR-017). |
+| Q-5 | Google Gemini API integration configured (`gemini-1.5-flash`), with deterministic rules-engine fallback (`rules-v1`). |
 | Q-10 | Separate `bonus_findings.json`, verified vs suspected (R-95, ADR-018). |
+| Q-13 | Resolved: SQLite is the existing database; external PostgreSQL container testing is eliminated. |
 
 Still open; the default applies unless the user says otherwise:
 

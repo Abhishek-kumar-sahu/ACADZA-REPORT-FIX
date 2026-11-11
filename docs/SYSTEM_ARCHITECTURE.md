@@ -1,11 +1,14 @@
 # System Architecture
 
+> **Project Status (2026-11-12): Phase 0–7 Complete. Phase 8 has NOT started.**
+
 ## 1. Shape of the system
 
-One deployable service. FastAPI serves both the REST API (`/api/*`) and the static vanilla-JS console (`/`). There is one database, selected by `DATABASE_URL`: SQLite locally, persistent PostgreSQL in production (ADR-015). The triage engine is a Python package inside the backend, usable two ways:
+One deployable service. FastAPI serves both the REST API (`/api/*`) and the static vanilla-JS console (`/`). 
 
-- **Batch:** `scripts/run_triage.py` processes all 44 reports and writes `results.json` plus the DB.
-- **On demand:** `POST /api/v1/triage/run` re-triages one case (for example after a faculty "request investigation").
+- **Database:** **SQLite is the primary, default, and existing database (`acadza.db`).** There is no migration to MySQL or PostgreSQL. Configured with Write-Ahead Logging (WAL) and foreign keys enabled.
+- **AI Integration:** Google Gemini (`gemini-1.5-flash`) via Generative Language API or OpenAI-compatible endpoint. Falls back cleanly to deterministic rules engine (`rules-v1`).
+- **Triage Pipeline:** Can run as batch (`scripts/run_triage.py`) or on-demand (`POST /api/v1/triage/run`).
 
 ```mermaid
 flowchart LR
@@ -17,9 +20,9 @@ flowchart LR
     STATIC[Static files /]
     ENG[Triage engine]
     VAL[Validators + rules<br/>deterministic]
-    DB[(SQLite / Postgres)]
+    DB[(SQLite acadza.db)]
   end
-  LLM[(LLM provider<br/>Anthropic / OpenAI-compatible / none)]
+  LLM[(Gemini API / Rules Fallback)]
   DATA[[data/*.json<br/>read-only]]
 
   UI -- fetch JSON --> API
@@ -32,7 +35,7 @@ flowchart LR
   ENG -- results.json --> FILE[[results.json]]
 ```
 
-**Why one service:** a single Render free web service, no CORS in production, one thing to keep alive for 7 days. Frontend and backend are still separate code trees and talk only through REST (ADR-001).
+**Why one service:** a single Render web service, no CORS in production, low memory footprint. Frontend and backend are cleanly separated into `frontend/` and `backend/` and communicate exclusively over REST (ADR-001).
 
 ## 2. Directory layout (planned)
 

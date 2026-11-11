@@ -2,9 +2,65 @@
 
 An honest log of how AI is used **inside** the product and **to build** it.
 
-> **Status (2026-11-11, Phase 4).** The product prompts below are **v1 drafts**. They have **not yet been executed** against any model. When they are, this file will record the date, model and outcome, and every change will get a new version with a reason. Nothing here claims a run that did not happen.
->
-> **The committed `results.json` was produced by the deterministic rules-only engine** (`backend/app/triage/`, engine `rules-v1`). **No LLM was involved in any verdict.** Rules-only decisions are labelled `engine_mode: rules_only` in the API and the snapshot. Because `results.json` follows the README schema exactly, the label appears there only as the evidence wording and the routes: no answer-key change auto-applies.
+> **Project Status (2026-11-12): Phase 0–7 Complete. Phase 8 has NOT started.**
+> 
+> - **AI Integration:** Google Gemini is supported and configured via environment settings (`LLM_PROVIDER=gemini`, model `gemini-1.5-flash`). The application connects to Gemini using Google Generative Language endpoints or OpenAI-compatible endpoints (`LLM_BASE_URL`).
+> - **Fallback Engine:** The baseline dataset and committed `results.json` were produced by the deterministic rules-only engine (`backend/app/triage/`, engine `rules-v1`) to provide a 100% reproducible, mathematically verifiable baseline without hallucination risks. When the Gemini API is unreachable, times out, or when `LLM_PROVIDER=none`, the system falls back seamlessly to the deterministic rules engine.
+> - **Security Boundary:** The LLM is granted zero tool access and zero write permissions. All outputs from the AI are treated as untrusted suggestions, validated by deterministic code against `taxonomy.json`, and require explicit human faculty approval before execution.
+
+---
+
+## Part A0: Gemini API Integration & AI Architecture
+
+### 1. Purpose and Functionality
+The AI integration assists the triage pipeline in two specific capacities:
+1. **Blind Solver (`solve.v1`):** Independently solves the question without access to the official answer key, stored solution, or student comments. This prevents confirmation bias and allows detecting mis-keyed questions where both the key and the student might be wrong.
+2. **Triage Proposal (`triage.v1`):** Analyzes the question, options, detector findings, and student reports to classify complaints, propose minimal localized repairs, and generate factual draft replies.
+
+### 2. Configuration & Environment Variables
+The Gemini integration is driven entirely by environment variables (loaded via `backend/app/config.py` using `pydantic-settings`):
+
+| Variable | Description | Configured Value |
+|---|---|---|
+| `LLM_PROVIDER` | Active LLM provider name | `gemini` (or `openai_compat`, `none`) |
+| `LLM_MODEL` | Target Gemini model identifier | `gemini-1.5-flash` |
+| `LLM_API_KEY` | Google Gemini API key (`SecretStr`) | Configured in `.env` (git-ignored, never logged) |
+| `LLM_BASE_URL` | Provider API base URL | `https://generativelanguage.googleapis.com/v1beta/openai/` |
+| `LLM_TIMEOUT_S` | Per-request timeout limit | `45` seconds |
+| `LLM_MAX_CONCURRENCY` | Maximum concurrent API calls | `4` workers |
+
+### 3. Request/Response Flow & Error Handling
+```
+[ Incoming Report ]
+       │
+       ▼
+[ Deterministic Detectors ] ──► (Structure, Spelling, Exam Tags, LaTeX leaks)
+       │
+       ▼
+[ Gemini Blind Solver ] ──────► Timeout / Rate Limit / Error?
+       │                                │
+       │ (Success)                      ▼ (Fallback)
+       │                        [ Deterministic Rules Engine (rules-v1) ]
+       ▼                                │
+[ Gemini Triage Analyst ] ──────────────┤
+       │                                │
+       ▼                                ▼
+[ Pydantic Strict Schema Validation (`extra="forbid"`) ]
+       │
+       ▼
+[ Scope & Taxonomy Check (`validators.py` - R-10..14) ]
+       │
+       ▼
+[ Calibrated Confidence & Routing (`engine.py` - R-87/88) ]
+       │
+       ▼
+[ Faculty Review Console (Requires Explicit Human Approval) ]
+```
+
+- **Strict Validation:** Responses must parse into rigid Pydantic models. Unexpected fields are rejected (`extra="forbid"`).
+- **Network Resilience:** Network drops, API quotas, or ReadTimeouts automatically trigger fallback to the deterministic rules engine.
+- **Auditing:** Every AI triage run logs the provider, model, token usage, and status to the `triage_runs` and `audit_events` tables.
+- **Faculty-Review Boundary:** Even with 1.0 confidence, the AI is structurally prohibited from publishing changes. Answer-key changes always require human teacher sign-off.
 
 ---
 

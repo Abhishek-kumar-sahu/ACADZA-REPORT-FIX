@@ -1,21 +1,30 @@
 # Security
 
+> **Project Status (2026-11-12): Phase 0–7 Complete. Phase 8 has NOT started.** Security invariants and defenses are verified across all API, data, and faculty execution layers.
+
 Threat model, scaled to this product: a public demo URL, untrusted student text, untrusted stored HTML, an LLM that can be steered, and question content where a bad write harms students.
 
-## 1. Secrets
-- `LLM_API_KEY`, `LLM_FALLBACK_API_KEY`, `FACULTY_ACCESS_KEY` and `DATABASE_URL` (contains the DB password) come from env only (`config.py`, pydantic-settings). `.env` is gitignored, and `.env.example` holds placeholders.
-- No secret is ever serialised into an API response. `/api/v1/settings` reports `configured: true/false` only.
-- Request headers are not logged. `ai_calls.request_text` stores the prompt body, never auth headers.
-- CI check T-S-03 greps `frontend/` for key-like strings.
+## 1. Secrets & API Keys
+- **Gemini API Key:** `LLM_API_KEY` (and optional fallback keys) are loaded strictly through environment variables into Pydantic `SecretStr`. They are git-ignored via `.gitignore` and `.env.example` contains only placeholders.
+- **Zero Leakage:** No secret is ever serialised into an API response, logs, or client-side storage. `/api/v1/settings` reports `configured: true/false` only.
+- **Request Headers & Logs:** Outbound and inbound auth headers are never logged. The JSON request logger on stderr records method, path, status, and duration, explicitly stripping headers and bodies.
+- **Faculty Key:** `FACULTY_ACCESS_KEY` is loaded as a `SecretStr`. On the frontend, it is kept strictly in JavaScript module memory (`state.js`) and is cleared from the DOM immediately upon verification; it is forgotten on page reload.
 
-## 2. Prompt injection
+## 2. Prompt Injection & AI Guardrails
 RULES §6 has the full set. In short:
 - Student comments are inserted only as JSON-escaped data inside `<student_reports>`, and `<`/`>` are escaped so the block can't be closed.
-- The system prompt states the trust model.
-- Output can't escalate. There is no route, actor or action field in the schema. `extra=forbid` applies.
+- The system prompt explicitly instructs the model that student text is untrusted evidence, not instructions.
+- Output can't escalate: the AI returns only structured JSON adhering to strict Pydantic schemas with `extra="forbid"`. There is no route, actor, or action field in the schema.
 - An edit supported only by a flagged comment is dropped (R-52). Its verdict comes from independent signals.
-- The LLM has **no tools**. It can't read or write anything. It only returns JSON.
-- The blind solver never sees comments at all.
+- The LLM has **zero tool access** and zero write permissions. It cannot read or modify the database or filesystem.
+- The blind solver (`solve.v1`) never sees student comments or stored keys.
+
+## 3. Database Security (SQLite)
+- **Engine:** SQLite is the default and existing database (`acadza.db`).
+- **SQL Injection Prevention:** All database operations use SQLAlchemy ORM or Core queries with parameter binding. No dynamic SQL string interpolation exists in the codebase.
+- **File System Permissions:** In local and containerized deployments, the database file is restricted to the running application process.
+- **Immutability Triggers:** Database triggers prevent updates or deletions of original question records (`original_json`) and make audit logs append-only.
+
 
 ## 3. Input validation and sanitisation (implemented, Phase 3)
 - **Requests:** Pydantic on every parameter. Path IDs are pattern-checked (`^[0-9a-f]{24}$`, `^R\d{3,6}$`), query enums are `Literal`s, string queries are capped at 64 chars, and bodies use `extra="forbid"`. Bodies over 64 KB are rejected by Content-Length (413). Validation errors return `loc`/`msg`/`type` but never echo the input.

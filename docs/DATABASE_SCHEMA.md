@@ -1,6 +1,16 @@
 # Database Schema
 
-SQLAlchemy 2.x models in `backend/app/models.py`. Datetime columns use `UTCDateTime`: naive UTC in the DB, timezone-aware in Python and the API (ADR-019). `cases.urgency`/`urgency_breakdown` exist but are currently computed on read instead (ADR-020). SQLite by default. Postgres via `DATABASE_URL` (ADR-015). Timestamps are ISO-8601 UTC. JSON columns are `JSON` (Postgres `JSONB`).
+SQLAlchemy 2.x models in `backend/app/models.py`. 
+
+> **Database engine:** **SQLite is the primary, default, and existing database (`acadza.db`).** There is no migration to MySQL or PostgreSQL. All features, constraints, transactions, and audit integrity are built and verified natively on SQLite.
+
+Datetime columns use `UTCDateTime`: naive UTC in the DB, timezone-aware in Python and the API (ADR-019). `cases.urgency`/`urgency_breakdown` are computed dynamically on read (ADR-020). Timestamps are ISO-8601 UTC. JSON columns use JSON serialisation.
+
+## 1. SQLite Configuration & Storage Architecture
+- **Engine URL:** `sqlite:///./acadza.db` (configured via `DATABASE_URL` in `config.py`).
+- **Concurrency & WAL Mode:** Configured with `PRAGMA journal_mode = WAL;` (Write-Ahead Logging) to allow concurrent readers without blocking writes, and `PRAGMA synchronous = NORMAL;`.
+- **Foreign Keys:** Enforced at connection time via `PRAGMA foreign_keys = ON;`.
+- **Backup & Persistence:** On Render free-tier, the local container disk is ephemeral. The application achieves reliable initialization and recovery using `BOOT_IMPORT=true` (which imports original data with SHA-256 verification) and `BOOT_FROM_SNAPSHOT=true` (which restores triage decisions upon boot if the database is newly created). Standard SQLite `.db` file backups or snapshot exports (`artifacts/triage_snapshot.json`) provide offline recovery.
 
 ## 1. ER diagram
 
@@ -164,19 +174,19 @@ erDiagram
 ## 3. Indexes and constraints
 
 - `reports(question_id)`, `reports(reported_at)`
-- `triage_results(report_id) WHERE is_current` (partial unique on Postgres; app-enforced on SQLite)
+- `triage_results(report_id) WHERE is_current` (app-enforced on SQLite)
 - `cases(status, urgency DESC)` for the queue
 - `audit_events(question_id, ts)`, `audit_events(event_type)`
 - `question_revisions(question_id, version)` unique
 - `ai_calls(run_id)`, `ai_calls(question_id)`
 - **CHECK constraints** generated from `taxonomy.json`: verdict, repair, route, confidence ∈ [0,1], `repair IS NULL OR verdict = 'defect'` (R-02), statuses.
-- **Triggers** (`db.py`, SQLite `RAISE(ABORT)` / Postgres `acadza_forbid()`):
+- **Triggers** (`backend/app/db.py`, SQLite `RAISE(ABORT)`):
   - `questions_original_immutable`: UPDATE OF original_json where the value changes → error.
-  - `questions_no_delete`.
-  - `audit_no_update`, `audit_no_delete`.
+  - `questions_no_delete`: DELETE prohibited on question records.
+  - `audit_no_update`, `audit_no_delete`: Append-only audit integrity.
   - `revisions_no_update`, `revisions_no_delete` (rollback = a new revision).
 - `meta(key, value)`: holds `schema_version` and the `data_sha256` fingerprint of the imported data.
-- **Why TEXT for the record JSON:** it reproduces the source record exactly, and the immutability trigger compares plain text identically on both dialects. Tests assert `original == source` for all 43 records.
+- **Why TEXT for the record JSON:** it reproduces the source record exactly, and the immutability trigger compares plain text directly in SQLite. Tests assert `original == source` for all 43 records.
 
 ## 4. Audit hash chain
 

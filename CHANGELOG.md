@@ -45,27 +45,36 @@ Format: Keep a Changelog. Dates are ISO.
 - Claim extraction read quoted record values ("key is C", "answer is 20") as student claims.
 - Replies: an unverified syllabus claim was called "a real problem"; internal and corrupted text leaked into replies.
 
-### Added — 2026-11-11 (Phase 7, system integration, QA & security audit)
-- Comprehensive end-to-end integration and lifecycle verification: report submission → triage → faculty investigation → proposal editing → validation → approval → execution → revision → rollback.
-- Security audit across all 10 write endpoints: authentication boundary enforcement, CORS lockdown, strict security headers and CSP, input length and type validation, allowlist HTML sanitization, SQLi protection (ORM bound parameters), prompt injection defense, audit hash-chain immutability, zero secret leakage.
-- Latency benchmarks across API and static assets: health (~4 ms), dashboard (~45 ms), case list (~44 ms), case detail (~50 ms), static assets (<10 ms).
-- Data integrity verification: all 43 original questions byte-identical to source datasets; 44 reports accounted for across 39 cases; `results.json` strictly 44 entries; `bonus_findings.json` strictly 7 findings; audit chain verified with 0 breaks.
-- Test suite verified: 509 tests passed, 0 skipped (453 backend + 56 Playwright Edge browser E2E tests).
-
-### Added — 2026-11-11 (Phase 6, faculty console)
-- `frontend/`: vanilla HTML/CSS/JS console (no framework, no build). 8 screens: Overview, Report Queue, Faculty Review, Question Review Workspace, Quality Audit, Revision History, Audit Logs, Settings.
-- Design system: dark charcoal / off-white / muted emerald, three-layer tokens with measured contrast, Inter self-hosted (OFL). DESIGN.md revision 2 and the per-screen §0 audit.
-- Workflows on real endpoints, kept as separate explicit actions: approve, edit → validate → approve, reject with reason, execute, rollback, investigate, reopen, duplicate, reply edit. The faculty key lives in memory only.
-- The backend serves the console at `/` with a strict Content-Security-Policy (self-only, no inline script). API behaviour is unchanged.
-- 56 Playwright/Edge browser tests; 509 tests total.
-
 ### Added — 2026-11-11 (Phase 5, faculty review & safe execution)
 - `backend/app/services/faculty_actions.py`: faculty approval (with optional re-validated proposal edit), rejection with mandatory reason, safe repair execution, rollback (LIFO per field), duplicate marking, reply editing, and dry-run edit validation.
 - API endpoints: `POST /repairs/{id}/approve` (with diff preview), `POST /repairs/{id}/reject`, `POST /repairs/{id}/execute`, `POST /revisions/{id}/rollback`, `POST /reports/{id}/duplicate`, `PUT /reports/{id}/reply`, `POST /validate-edit`.
 - Security & execution safeguards: queued auto-eligible fixes require explicit faculty approval before execution; answer-key changes require teacher authorization; missing options cannot be invented; original records remain immutable; compare-and-set optimistic concurrency prevents stale edits; atomic transactions ensure no partial updates.
 - Prompt injection & XSS filtering: `_check_injection` blocks jailbreak instructions and malicious HTML/script patterns in edits and replies.
 - Audit & revision history: immutable audit events with SHA-256 hash chaining, before/after snapshots, actor, timestamp, and verification after every write operation.
-- Tests: 87 new tests in `backend/tests/test_api_phase5.py`; full suite has 453 tests passed, 0 skipped.
+- Tests: 87 tests in `backend/tests/test_api_phase5.py`; full suite reached 453 tests passed, 0 skipped.
 
-### Not yet built
-- LLM provider adapters (T4.3/T4.4), Phase 6 frontend console, deployment. Postgres test run (T2.5) is a hard gate before deploy.
+### Added — 2026-11-11 (Phase 6, faculty console)
+- `frontend/`: vanilla HTML/CSS/JS console (no framework, no build). 8 screens: Overview, Report Queue, Faculty Review, Question Review Workspace, Quality Audit, Revision History, Audit Logs, Settings.
+- Design system: dark charcoal / off-white / muted emerald, three-layer tokens with measured contrast, Inter self-hosted (OFL).
+- Workflows on real endpoints, kept as separate explicit actions: approve, edit → validate → approve, reject with reason, execute, rollback, investigate, reopen, duplicate, reply edit. The faculty key lives in memory only.
+- The backend serves the console at `/` with a strict Content-Security-Policy (self-only, no inline script).
+- 56 Playwright/Edge browser tests added.
+
+### Added — 2026-11-11 (Phase 7, system integration, QA & security audit)
+- Comprehensive end-to-end integration and lifecycle verification: report submission → triage → faculty investigation → proposal editing → validation → approval → execution → revision → rollback.
+- Security audit across all 10 write endpoints: authentication boundary enforcement, CORS lockdown, strict security headers and CSP, input length and type validation, allowlist HTML sanitization, SQLi protection (ORM bound parameters), prompt injection defense, audit hash-chain immutability, zero secret leakage.
+- Latency benchmarks across API and static assets: health (~4 ms), dashboard (~45 ms), case list (~44 ms), case detail (~50 ms), static assets (<10 ms).
+- Data integrity verification: all 43 original questions byte-identical to source datasets; 44 reports accounted for across 39 cases; `results.json` strictly 44 entries; `bonus_findings.json` strictly 7 findings; audit chain verified with 0 breaks.
+- Full test suite verified: 509 tests passed, 0 skipped (453 backend + 56 Playwright Edge browser E2E tests).
+
+### Changed — 2026-11-12 (Documentation Audit & Alignment)
+- Audited and updated all documentation to align strictly with source code reality:
+  - Preserved SQLite (`acadza.db`) as the primary, default, and existing database; removed contradictory PostgreSQL/MySQL migration claims.
+  - Documented Gemini API integration (`gemini-1.5-flash`), environment variables, prompt/response flow, error handling, rate limiting, and rules-engine fallback.
+  - Documented Render deployment specifications (`render.yaml`) and SQLite ephemeral filesystem considerations with startup auto-seeding (`BOOT_IMPORT`, `BOOT_FROM_SNAPSHOT`).
+  - Recorded project status accurately: Phase 0–7 Complete; Phase 8 (Formal Testing & QA Sign-Off) has **not started**.
+  - Verified no application source code, database records, or seed data were modified during documentation audit.
+
+### Project Status
+- **Completed:** Phase 0 (Discovery), Phase 1 (Inspection & PRD), Phase 2 (Data Layer & Triggers), Phase 3 (API Foundation & Auth), Phase 4 (Triage Rules Engine & Deliverables), Phase 5 (Faculty Actions & Safe Execution), Phase 6 (Faculty Review Console UI), Phase 7 (Full System Integration, QA & Security Audit).
+- **Not Started:** Phase 8 (Formal Testing & Final QA Sign-off), Phase 9 (Production Deployment on Render), Phase 10 (Submission & Screen Recording).
