@@ -54,10 +54,4 @@ uvicorn backend.app.main:app --reload --port 8000
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for Render deployment configuration. Works in both AI-assisted mode (Gemini) and deterministic rules-only mode (`LLM_PROVIDER=none`).
 
-## Deliverables checklist
-- [ ] Public GitHub repo
-- [x] `results.json` (44 entries, validated)
-- [ ] Live URL (Render)
-- [x] `PROMPTS.md` (prompts, Gemini integration flow, human review log)
-- [x] `PRODUCT.md` (strictly ≤ 1 page)
-- [ ] 3-minute screen recording
+
