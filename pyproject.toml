@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["backend/tests"]
+addopts = "-q"
+markers = [
+  "postgres: needs a reachable PostgreSQL (TEST_POSTGRES_URL)",
+  "pipeline: needs the triage pipeline (Phase 4)",
+  "e2e: browser tests (Playwright + Microsoft Edge); skipped if unavailable",
+]

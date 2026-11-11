@@ -1,0 +1,5 @@
+* text=auto eol=lf
+data/*.json -text
+results.json -text
+bonus_findings.json -text
+artifacts/*.json -text

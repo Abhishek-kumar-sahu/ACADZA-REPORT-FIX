@@ -1,0 +1,103 @@
+{
+  "about": "Unreported question-level findings from the rules engine's detectors. These are NOT student reports and are not part of results.json. 'verified' = structural fact quoted from the record; 'suspected' = heuristic that needs a teacher.",
+  "engine": "rules-v1",
+  "engine_mode": "rules_only",
+  "questions_inspected": 43,
+  "counts": {
+    "verified": 3,
+    "suspected": 4
+  },
+  "findings": [
+    {
+      "questionId": "6062ec84518e9535e120c422",
+      "subject": "Physics",
+      "chapter": "Temperature and thermal properties of matter",
+      "field": "solution",
+      "category": "notation",
+      "check": "unit_text_mismatch",
+      "status": "suspected",
+      "severity": "low",
+      "evidence": "solution ends '5.7 × 10^-5 / CC' but option (A) reads '5.7 x 10^-5/^oC'",
+      "recommended_action": "Correct the unit/symbol so the solution and the options agree.",
+      "findingId": "B01"
+    },
+    {
+      "questionId": "622df25ab70e4b50e44ff837",
+      "subject": "Physics",
+      "chapter": "Properties of matter and fluid mechanics",
+      "field": "question",
+      "category": "spelling",
+      "check": "near_miss_spelling",
+      "status": "suspected",
+      "severity": "low",
+      "evidence": "'hemispherial' and 'hemispherical' both appear in this record (one is likely misspelt)",
+      "recommended_action": "Confirm which spelling is correct and fix the misspelt form.",
+      "findingId": "B02"
+    },
+    {
+      "questionId": "622f08d7b70e4b50e4500a1b",
+      "subject": "Physics",
+      "chapter": "Centre of mass and momentum conservation (collision)",
+      "field": "solution",
+      "category": "markup_leak",
+      "check": "alignment_leak",
+      "status": "verified",
+      "severity": "low",
+      "evidence": "LaTeX alignment '&' rendered as a symbol in solution (2x)",
+      "recommended_action": "Replace the visible markup with proper MathML/text (mechanical; faculty to confirm).",
+      "findingId": "B03"
+    },
+    {
+      "questionId": "6264197209f4fd65f58f5707",
+      "subject": "Zoology",
+      "chapter": "Biotechnology and its Applications",
+      "field": "question",
+      "category": "spelling",
+      "check": "near_miss_spelling",
+      "status": "suspected",
+      "severity": "low",
+      "evidence": "'Canolla' and 'Canola' both appear in this record (one is likely misspelt)",
+      "recommended_action": "Confirm which spelling is correct and fix the misspelt form.",
+      "findingId": "B04"
+    },
+    {
+      "questionId": "68c801bc1b1dbc16dc93bf2b",
+      "subject": "Physics",
+      "chapter": "Photoelectric effect and matter waves",
+      "field": "solution",
+      "category": "markup_leak",
+      "check": "alignment_leak",
+      "status": "verified",
+      "severity": "low",
+      "evidence": "LaTeX alignment '&' rendered as a symbol in solution (2x)",
+      "recommended_action": "Replace the visible markup with proper MathML/text (mechanical; faculty to confirm).",
+      "findingId": "B05"
+    },
+    {
+      "questionId": "6956d79788d7701e5617bc29",
+      "subject": "Physics",
+      "chapter": "AC Circuits",
+      "field": "solution",
+      "category": "markup_leak",
+      "check": "alignment_leak",
+      "status": "verified",
+      "severity": "low",
+      "evidence": "LaTeX alignment '&' rendered as a symbol in solution (2x)",
+      "recommended_action": "Replace the visible markup with proper MathML/text (mechanical; faculty to confirm).",
+      "findingId": "B06"
+    },
+    {
+      "questionId": "6956d7e988d7701e5617bd3e",
+      "subject": "Physics",
+      "chapter": "Oscillations",
+      "field": "solution",
+      "category": "notation",
+      "check": "unit_text_mismatch",
+      "status": "suspected",
+      "severity": "low",
+      "evidence": "solution ends '8 sqrt(2) m' but option (D) reads '8 sqrt(2 m)'",
+      "recommended_action": "Correct the unit/symbol so the solution and the options agree.",
+      "findingId": "B07"
+    }
+  ]
+}

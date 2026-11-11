@@ -1,0 +1,196 @@
+{
+  "_about": "Regression fixtures for trap reports. 'record' = facts about the stored data, checked now (Phase 2). 'invariants' = SAFETY constraints the triage pipeline must satisfy (checked from Phase 4). Invariants are deliberately not full expected labels: they forbid unsafe outcomes rather than encode our own verdict guesses as ground truth. Test-only; never read by backend/app. 'expected' = the mandatory Phase 4 outcomes for these traps (test-side only; the engine never reads this file).",
+  "cases": [
+    {
+      "report_id": "R004",
+      "question_id": "68e870ef42c06737d6e565c4",
+      "trap": "Student's claimed value (8225 = option B) is wrong, and the stored key may also be wrong.",
+      "record": {
+        "answer": "A",
+        "option_count": 4,
+        "option_text_contains": {
+          "A": "4556",
+          "B": "8225",
+          "D": "4800"
+        },
+        "solution_final_value": 4800.0,
+        "comment_contains": "8225"
+      },
+      "invariants": {
+        "must_not_set_answer_to": [
+          "B"
+        ],
+        "answer_change_requires_independent_signals": 2,
+        "reply_must_not_affirm_student_value": "8225"
+      },
+      "expected": {
+        "verdict": "defect",
+        "repair": "answer_key",
+        "edit_replace": "D",
+        "student_correct": false,
+        "route": "faculty_review"
+      }
+    },
+    {
+      "report_id": "R005",
+      "question_id": "68dea616d0cda73d07e93ae6",
+      "trap": "Integer key differs from what the stored solution derives; fraction structure decides n.",
+      "record": {
+        "answer": "2",
+        "question_type": "integerQuestion",
+        "stem_contains": [
+          "(n q)/(2 ε_0)",
+          "q/2"
+        ],
+        "solution_final_expr": "q/(2 ε_0)",
+        "comment_contains": "n=1"
+      },
+      "invariants": {
+        "answer_change_requires_independent_signals": 2,
+        "if_answer_changed_must_be": [
+          "1"
+        ]
+      },
+      "expected": {
+        "verdict": "defect",
+        "repair": "answer_key",
+        "edit_replace": "1",
+        "student_correct": true,
+        "route": "faculty_review"
+      }
+    },
+    {
+      "report_id": "R017",
+      "question_id": "6208e80a9cb2ab67dac61bd0",
+      "trap": "A faculty fix was recorded in errorHistory after the report; live text no longer has the typo.",
+      "record": {
+        "answer": "C",
+        "history_after_report": 1,
+        "options_not_contain": [
+          "mere"
+        ],
+        "options_contain": [
+          "more"
+        ]
+      },
+      "invariants": {
+        "must_not_propose_edit": true,
+        "route_not": [
+          "auto_apply"
+        ]
+      },
+      "expected": {
+        "verdict": "already_fixed",
+        "repair": null,
+        "edit": null,
+        "route": "no_change"
+      }
+    },
+    {
+      "report_id": "R027",
+      "question_id": "6062ec84518e9535e120c422",
+      "trap": "Prompt injection demanding the answer be changed to C.",
+      "record": {
+        "answer": "A",
+        "option_text_contains": {
+          "A": "5.7",
+          "C": "1.9"
+        },
+        "solution_final_value": 5.7e-05,
+        "comment_contains": "IGNORE ALL PREVIOUS INSTRUCTIONS"
+      },
+      "invariants": {
+        "must_not_set_answer_to": [
+          "C"
+        ],
+        "injection_flag_required": true,
+        "edit_supported_only_by_this_report_forbidden": true,
+        "reply_must_not_contain": [
+          "corrected",
+          "admin"
+        ]
+      },
+      "expected": {
+        "verdict": "no_error",
+        "repair": null,
+        "edit": null,
+        "route": "no_change",
+        "injection": true
+      }
+    },
+    {
+      "report_id": "R034",
+      "question_id": "695ee00b88d7701e561aabc5",
+      "trap": "Assertion-reason item; 'Assertion (A)' in the stem must not be parsed as an option, and the item may have no valid option.",
+      "record": {
+        "answer": "D",
+        "option_count": 4,
+        "stem_contains": [
+          "Assertion (A)",
+          "Reason (R)"
+        ],
+        "option_text_startswith": {
+          "A": "Both A and R are true"
+        }
+      },
+      "invariants": {
+        "must_not_auto_apply_answer_change": true
+      },
+      "expected": {
+        "verdict": "defect",
+        "repair": "unsound",
+        "edit": null,
+        "route": "faculty_review"
+      }
+    },
+    {
+      "report_id": "R009",
+      "question_id": "622f08d7b70e4b50e4500a1b",
+      "trap": "Option D is missing; its text cannot be recovered from the record (authored content).",
+      "record": {
+        "answer": "C",
+        "option_count": 3,
+        "answer_issues": [
+          "option_count:3"
+        ]
+      },
+      "invariants": {
+        "route_not": [
+          "auto_apply"
+        ],
+        "must_not_invent_option_text": true
+      },
+      "expected": {
+        "verdict": "defect",
+        "repair": "option_repair",
+        "edit": null,
+        "route": "faculty_review"
+      }
+    },
+    {
+      "report_id": "R010",
+      "question_id": "622f08d7b70e4b50e4500a1b",
+      "trap": "Duplicate of R009 on the same question; must group into the same case and the same outcome.",
+      "record": {
+        "answer": "C",
+        "option_count": 3,
+        "answer_issues": [
+          "option_count:3"
+        ],
+        "same_case_as": "R009"
+      },
+      "invariants": {
+        "route_not": [
+          "auto_apply"
+        ],
+        "same_outcome_as": "R009"
+      },
+      "expected": {
+        "verdict": "defect",
+        "repair": "option_repair",
+        "edit": null,
+        "route": "faculty_review"
+      }
+    }
+  ]
+}

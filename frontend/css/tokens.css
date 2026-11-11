@@ -1,0 +1,77 @@
+/* Acadza design tokens. Three layers: primitive → semantic → component (docs/DESIGN.md §2).
+   Contrast values in comments were measured (WCAG relative luminance). */
+
+@font-face {
+  font-family: "Inter";
+  src: url("../assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* ---- primitives (never referenced by components) ---- */
+  --c-gray-950: #0F1110;
+  --c-gray-900: #161917;
+  --c-gray-850: #1C201E;
+  --c-gray-800: #232825;
+  --c-gray-700: #2A2F2C;
+  --c-gray-600: #3B413D;
+  --c-gray-500: #646C67;
+  --c-gray-400: #8E8D87;
+  --c-gray-200: #B9B7B0;
+  --c-gray-50:  #E9E7E1;
+  --c-emerald-500: #4CB38C;
+  --c-emerald-900: #0B1A14;
+  --c-red-400: #E07A70;
+  --c-amber-400: #D6A548;
+  --c-steel-300: #8FB3BF;
+
+  /* ---- semantic ---- */
+  --bg: var(--c-gray-950);
+  --surface: var(--c-gray-900);
+  --raised: var(--c-gray-850);
+  --hover: var(--c-gray-800);
+  --line: var(--c-gray-700);          /* decorative divider */
+  --line-strong: var(--c-gray-600);
+  --line-input: var(--c-gray-500);    /* 3.28:1 on surface (WCAG 1.4.11) */
+  --ink: var(--c-gray-50);            /* 14.3:1 on surface */
+  --ink-2: var(--c-gray-200);         /* 8.8:1 */
+  --ink-3: var(--c-gray-400);         /* 5.3:1; 4.5:1 floor on hover - avoid there */
+  --accent: var(--c-emerald-500);     /* 6.9:1 */
+  --on-accent: var(--c-emerald-900);  /* 6.9:1 on accent */
+  --danger: var(--c-red-400);
+  --warn: var(--c-amber-400);
+  --info: var(--c-steel-300);
+  --soft-accent: rgb(76 179 140 / 0.13);
+  --soft-danger: rgb(224 122 112 / 0.13);
+  --soft-warn: rgb(214 165 72 / 0.13);
+  --soft-info: rgb(143 179 191 / 0.12);
+  --soft-neutral: rgb(185 183 176 / 0.10);
+  --del-bg: #3A201D; --del-ink: #F2B5AE; /* 8.5:1 */
+  --ins-bg: #16362A; --ins-ink: #B5E6CF; /* 9.5:1 */
+
+  /* ---- type ---- */
+  --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --font-math: math, "Cambria Math", "STIX Two Math", "Latin Modern Math", serif;
+  --fs-xs: 11px; --fs-sm: 12.5px; --fs-ui: 13.5px; --fs-content: 16px; --fs-title: 20px;
+
+  /* ---- spacing, shape, motion ---- */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 40px; --s8: 48px;
+  --radius-sm: 4px; --radius: 6px;            /* 8px is the hard maximum (DESIGN §0) */
+  --shadow-overlay: 0 24px 48px rgb(0 0 0 / 0.40);
+  --t-fast: 80ms; --t-med: 120ms;
+
+  /* ---- component ---- */
+  --sidebar-w: 224px; --topbar-h: 52px;
+  --btn-h: 32px; --input-h: 32px; --row-h: 40px; --badge-h: 20px;
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-fast: 0ms; --t-med: 0ms; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
