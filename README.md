@@ -46,10 +46,4 @@ Screenshots of every screen: [docs/screenshots/](docs/screenshots/).
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). It works without an LLM key (`LLM_PROVIDER=none`, rules-only mode, clearly labelled).
 
-## Deliverables checklist
-- [ ] Public GitHub repo
-- [x] `results.json` (44 entries, validated; **rules-only, no LLM**)
-- [ ] Live URL (Render)
-- [x] `PROMPTS.md` (started; product prompts are v1 drafts, not yet run)
-- [x] `PRODUCT.md`
-- [ ] 3-minute screen recording
+
